@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Invalid token · minimal</title>
+
+    <!-- External: Bootstrap & GSAP -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,500;1,500&display=swap');
+
+        :root {
+            --bg: #f4f4f2;
+            --text-dark: #1a1a1a;
+            --text-muted: #666666;
+            --accent: #4a5d4e;
+            --border-light: rgba(0, 0, 0, 0.08);
+        }
+
+        body, html {
+            height: 100%;
+            margin: 0;
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg);
+            color: var(--text-dark);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .status-card {
+            background: transparent;
+            width: 100%;
+            max-width: 420px;
+            padding: 2rem 2rem 2.2rem;
+            text-align: center;
+            opacity: 0;
+            transform: translateY(24px);
+        }
+
+        .icon-container {
+            margin-bottom: 2rem;
+            position: relative;
+        }
+
+        .hourglass-icon {  /* keeps class name for styling, now holds X icon */
+            width: 76px;
+            height: 76px;
+            margin: 0 auto;
+            border-radius: 50%;
+            border: 1px solid var(--border-light);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: border-color 0.2s;
+        }
+
+        .hourglass-icon svg {
+            width: 34px;
+            height: 34px;
+            stroke: var(--text-dark);
+            stroke-width: 1.2;
+            fill: none;
+            transition: stroke 0.2s;
+        }
+
+        .hourglass-icon:hover {
+            border-color: var(--text-muted);
+        }
+        .hourglass-icon:hover svg {
+            stroke: var(--text-dark);
+        }
+
+        h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.1rem;
+            font-weight: 500;
+            margin-bottom: 0.4rem;
+            letter-spacing: -0.02em;
+        }
+
+        .message-desc {
+            font-size: 0.95rem;
+            color: var(--text-muted);
+            margin-bottom: 2.8rem;
+            font-weight: 400;
+            line-height: 1.5;
+            max-width: 320px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        /* button – liquid style, but will be made "useless" after one click */
+        .btn-primary {
+            position: relative;
+            width: 100%;
+            height: 58px;
+            border: 1px solid var(--text-dark);
+            background: transparent;
+            color: var(--text-dark);
+            font-weight: 500;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.18em;
+            overflow: hidden;
+            cursor: pointer;
+            margin-top: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.3s cubic-bezier(0.23, 1, 0.32, 1), border-color 0.2s, opacity 0.2s;
+            text-decoration: none;
+        }
+
+        .btn-primary span {
+            position: relative;
+            z-index: 2;
+            transition: color 0.4s ease;
+        }
+
+        .liquid {
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: var(--text-dark);
+            z-index: 1;
+        }
+
+        .liquid::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            right: -12px;
+            width: 24px;
+            height: 100%;
+            background: var(--text-dark);
+            clip-path: polygon(0% 0%, 100% 50%, 0% 100%);
+            opacity: 0.95;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+        }
+
+        .btn-primary:hover span {
+            color: #fff;
+        }
+
+        /* disabled state – the button becomes "useless" and non-interactive */
+        .btn-primary.disabled,
+        .btn-primary:disabled {
+            opacity: 0.6;
+            transform: none !important;
+            pointer-events: none;
+            border-color: var(--text-muted);
+        }
+
+        .btn-primary.disabled .liquid,
+        .btn-primary:disabled .liquid {
+            background: var(--text-muted); /* subtle change when disabled */
+        }
+        .btn-primary.disabled .liquid::after,
+        .btn-primary:disabled .liquid::after {
+            background: var(--text-muted);
+        }
+
+        .footer-minimal {
+            margin-top: 3.2rem;
+            font-size: 0.68rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.18em;
+            opacity: 0.6;
+        }
+
+        @media (max-width: 480px) {
+            .status-card {
+                padding: 1.5rem 1.5rem 1.8rem;
+                max-width: 360px;
+            }
+            h1 {
+                font-size: 2rem;
+            }
+            .btn-primary {
+                height: 54px;
+                font-size: 0.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <main class="status-card" id="mainCard">
+        <div class="icon-container">
+            <div class="hourglass-icon" id="icon">
+                <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="1.2"/>
+                    <line x1="8" y1="8" x2="16" y2="16" stroke="currentColor" stroke-width="1.2"/>
+                    <line x1="16" y1="8" x2="8" y2="16" stroke="currentColor" stroke-width="1.2"/>
+                </svg>
+            </div>
+        </div>
+
+        <!-- Updated message: user should request new link via the app -->
+        <h1>Invalid token</h1>
+        <p class="message-desc">
+
+
+        </p>
+
+        <!-- Button now acts as a simple "Understood" acknowledgment, becomes useless after one click -->
+        <a href="#" class="btn-primary" id="actionBtn" onclick="return handleAcknowledge(event)">
+            <span>Okay, Thank You</span>
+            <div class="liquid"></div>
+        </a>
+
+        <div class="footer-minimal">
+            © 2024 protocol — est. london
+        </div>
+    </main>
+
+    <script>
+        window.onload = () => {
+            const card = document.getElementById('mainCard');
+            const icon = document.getElementById('icon');
+
+            gsap.to(card, {
+                opacity: 1,
+                y: 0,
+                duration: 1.2,
+                ease: "power2.out"
+            });
+
+            gsap.from(icon, {
+                filter: "blur(6px)",
+                opacity: 0,
+                scale: 0.95,
+                duration: 1.2,
+                delay: 0.2,
+                ease: "power2.out"
+            });
+
+            // liquid button effect (only active while button is not disabled)
+            const btn = document.getElementById('actionBtn');
+            const liquid = btn.querySelector('.liquid');
+
+            function enableLiquidEffect() {
+                if (btn.classList.contains('disabled')) return;
+
+                btn.addEventListener('mouseenter', onMouseEnter);
+                btn.addEventListener('mouseleave', onMouseLeave);
+            }
+
+            function onMouseEnter() {
+                if (btn.classList.contains('disabled')) return;
+                gsap.to(liquid, {
+                    left: "0%",
+                    duration: 0.65,
+                    ease: "power2.inOut"
+                });
+            }
+
+            function onMouseLeave() {
+                if (btn.classList.contains('disabled')) {
+                    gsap.set(liquid, { left: "-100%" });
+                    return;
+                }
+                gsap.to(liquid, {
+                    left: "100%",
+                    duration: 0.65,
+                    ease: "power2.inOut",
+                    onComplete: () => {
+                        if (!btn.classList.contains('disabled')) {
+                            gsap.set(liquid, { left: "-100%" });
+                        }
+                    }
+                });
+            }
+
+            // Attach listeners initially
+            enableLiquidEffect();
+
+            // If button becomes disabled later, we ensure liquid stays reset
+        };
+
+        // Handle "Understood" click – makes button useless (disabled) and changes text
+        function handleAcknowledge(e) {
+            e.preventDefault();
+
+            const btn = document.getElementById('actionBtn');
+            // Prevent double-acknowledgment
+            if (btn.classList.contains('disabled')) return false;
+
+            const span = btn.querySelector('span');
+            const liquid = btn.querySelector('.liquid');
+
+            // Immediately disable the button (no further interaction)
+            btn.classList.add('disabled');
+            // Optionally remove hover listeners to be safe (they already check class)
+            // Change text to "Understood ✓"
+            span.innerText = 'Understood ✓';
+
+            // Quick little animation to show acknowledgment
+            gsap.to(btn, {
+                scale: 0.98,
+                duration: 0.1,
+                yoyo: true,
+                repeat: 1,
+                onComplete: () => {
+                    gsap.set(btn, { scale: 1 });
+                }
+            });
+
+            // Also reset liquid position (in case it was mid-animation)
+            gsap.set(liquid, { left: "-100%" });
+
+            // No further action – user must request new link via the app, as instructed.
+            return false;
+        }
+    </script>
+</body>
+</html>
